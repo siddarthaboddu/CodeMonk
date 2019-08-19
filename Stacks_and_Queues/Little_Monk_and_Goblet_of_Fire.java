@@ -125,12 +125,12 @@ public class Little_Monk_and_Goblet_of_Fire {
 
         HashMap<Integer,Integer> hashMap = new HashMap<>();
         int positionVal = 0;
-        int queuePos = 0;
+
+        StringBuilder result = new StringBuilder();
+
         for(int q = 0; q < Q; q++){
             String[] line  = in.readLine().split(" ");
-//            System.out.println("line "+Arrays.toString(line));
             char option = line[0].charAt(0);
-
 
             if(option == 'E'){
                 int x = Integer.parseInt(line[1]);
@@ -153,31 +153,34 @@ public class Little_Monk_and_Goblet_of_Fire {
             else{
                 Queue<Integer> queue = list.get(0);
                 int xmin1 = listNumbers.get(0);
+                int yResult = queue.poll();
+
+                result.append((xmin1+1)+" "+yResult);
+                result.append("\n");
+
                 if(queue.isEmpty()){
                     list.remove(queue);
-                    list.remove(0);
-                    used[]
-                }
-                else{
-                    int yResult = queue.poll();
-                    System.out.println((xmin1+1)+" "+yResult);
-                }
+                    listNumbers.remove(0);
+                    Object[] keys = hashMap.keySet().toArray();
+                    for(Object k : keys){
+                        Integer key = (Integer) k;
+                        if(hashMap.get(key) == 0){
+                            hashMap.remove(key);
+                            used[key] = 0;
+                        }
+                        else{
+                            hashMap.put(key,hashMap.get(key) -1);
+                        }
+                    }
 
-//                for(int i=0;i<list.size();i++){
-//                    Queue<Integer> queue = list.get(i);
-//                    if(queue.isEmpty()){
-//                        continue;
-//                    }
-//                    int xmin1 = listNumbers.get(i);
-//                    int yResult = queue.poll();
-//                    System.out.println((xmin1+1)+" "+yResult);
-//                    break;
-//                }
+                }
 
             }
 
 
         }
+
+        System.out.println(result);
 
     }
 
