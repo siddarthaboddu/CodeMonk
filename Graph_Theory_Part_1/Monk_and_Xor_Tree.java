@@ -1,16 +1,13 @@
- package Graph_Theory_Part_1;
+//package Graph_Theory_Part_1;
 
 import javafx.util.Pair;
-import sun.misc.Queue;
 
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
-
-public class Little_Monk_and_Edge_Count {
+public class Monk_and_Xor_Tree {
 
     static class Reader {
         final private int BUFFER_SIZE = 1 << 16;
@@ -126,16 +123,15 @@ public class Little_Monk_and_Edge_Count {
         }
 
     }
+
     static class Graph{
 
         ArrayList<Pair<Node, ArrayList<Node>>> list;
         int capacity ;
-        int[] counts ;
 
         Graph(int[] arr,int n){
             list = new ArrayList<Pair<Node,ArrayList<Node>>>();
             capacity = n;
-            counts = new int[n];
 
             for(int i=0;i<n;i++){
                 Pair<Node,ArrayList<Node>> pair = new Pair<Node,ArrayList<Node>>(new Node(i,arr[i]), new ArrayList<Node>());
@@ -149,57 +145,46 @@ public class Little_Monk_and_Edge_Count {
         }
 
         void addEdge(int x,int y){
-            if(x == y) return;
             Node nodeX = list.get(x).getKey();
             Node nodeY = list.get(y).getKey();
 
             list.get(x).getValue().add(nodeY);
-            list.get(y).getValue().add(nodeX);
+//            list.get(y).getValue().add(nodeX);
 
         }
 
-        int countNodes(int pos,boolean[] traversed) throws Exception {
-            Queue<Node> queue= new Queue<>();
-            Node node = list.get(pos).getKey();
-            queue.enqueue(node);
-//            traversed[node.node] = true;
-//            int edges = getAdjacentList(node.node).size();
-            int nodeCount = 0;
+        int count = 0;
+        boolean[] traversed;
+        int[] arr;
+        void calculateVal(int[] arr,int k){
+            this.arr = arr;
+            traversed = new boolean[capacity];
+//            HashMap<Integer, HashMap<Integer,Integer>> values= new HashMap<Integer, HashMap<Integer, Integer>>();
+            for(int i=0;i<capacity;i++){
+                int currentPos = 10;
+                int root = i;
+                int currentValue = 0;
+                finder(currentPos,root,currentValue,k);
+            }
 
-            while(!queue.isEmpty()){
-                Node temp = queue.dequeue();
-                if(traversed[temp.node] == true) continue;
-                traversed[temp.node] = true;
-//                edgeCount += getAdjacentList(temp.node).size();
-                nodeCount++;
-                for(Node nextNode : getAdjacentList(temp.node)){
-                    if(traversed[nextNode.node] == false){
-                        queue.enqueue(nextNode);
-                    }
+        }
+
+        void finder(int current,int root,int currentValue,int k){
+            if(current >= capacity || root >= capacity) return;
+            if(traversed[current] == true) return;
+
+//            System.out.println(current+"    "+root);
+            currentValue = currentValue ^ arr[current];
+            if(currentValue == k){
+                count++;
+            }
+            traversed[current] = true;
+            for(Node node : getAdjacentList(current)){
+                if(traversed[node.node] == false){
+                    finder(node.node,root,currentValue,k);
                 }
-
             }
-
-            return nodeCount;
-        }
-
-        void countNumberOfChildNodes(){
-            int parent = 1;
-            boolean[] traversed = new boolean[capacity];
-            finder(traversed,parent);
-        }
-
-        int finder(boolean[] traversed,int pos){
-            if(traversed[pos] == true) return 0;
-            int numberOfChildren = 1;
-            traversed[pos] = true;
-            for(Node node : getAdjacentList(pos)){
-                if(traversed[node.node] == false)
-                    numberOfChildren += finder(traversed,node.node);
-            }
-            //traversed[pos] = false;
-            counts[pos] = numberOfChildren;
-            return numberOfChildren;
+            traversed[current] = false;
         }
 
     }
@@ -208,62 +193,24 @@ public class Little_Monk_and_Edge_Count {
         Reader in = new Reader();
 
         int n = in.nextInt();
-        int q = in.nextInt();
+        int k = in.nextInt();
 
         int[] arr = new int[n];
-        Graph graph = new Graph(arr, n);
-        int[][] edges = new int[n-1][2];
-        for(int i=0;i<n-1;i++){
-            int x = in.nextInt() - 1;
-            int y = in.nextInt() - 1;
-            // if(x==y) continue;
-            edges[i][0] = x ;
-            edges[i][1] = y;
-
-            graph.addEdge(x,y);
+        for(int i=0;i<n;i++){
+            arr[i] = in.nextInt();
         }
-        System.out.println("started counting children");
-        graph.countNumberOfChildNodes();
 
-        int[] counts = graph.counts;
+        Graph graph = new Graph(arr,n);
+        for(int i=1;i<n;i++){
+            int parent = in.nextInt() - 1;
 
-         System.out.println("finished counting children" + n+"   "+q);
-
-        StringBuilder result = new StringBuilder();
-
-
-        int[] inputQueries = new int[q];
-        for(int i=0;i<q;i++){
-            inputQueries[i] = in.nextInt();
+            if(parent != i)
+                graph.addEdge(parent, i);
         }
-        System.out.println("finished input now processing output");
-        for(int Q = 0; Q< q;Q++){
-            int edgeNumber = inputQueries[Q];
-            int[] edge = edges[edgeNumber -1];
 
-            int x = edge[0];
-            int y = edge[1];
+        graph.calculateVal(arr,k);
 
-//            boolean[] traversed = new boolean[n];
-//            traversed[y] = true;
-//            int xNodes = graph.countNodes(x,traversed);
-////            traversed[y] = false;
-////            int yNodes = graph.countNodes(y,traversed);
-////            System.out.println(xNodes * (n-xNodes));
-//            int paths = xNodes * (n-xNodes);
-//            result.append((paths)+"\n");
-            long resultVal = 0l;
-            int countx = counts[x];
-            int county = counts[y];
-            if(countx < county){
-                resultVal = ((long)countx) * ((long)(n - countx));
-            }
-            else{
-                resultVal = ((long)county) * ((long)(n - county));
-            }
-            result.append(resultVal+"\n");
-        }
-        System.out.println(result);
+        System.out.println(graph.count);
     }
 
 }
